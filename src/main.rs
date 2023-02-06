@@ -1,18 +1,32 @@
-use std::net::TcpListener;
-use std::env;
-mod miko;
+use std::net::*;
+use std::io::prelude::*;
+
+mod config;
+mod log;
 
 fn main() {
-    match env::var("PORT") {
-        Ok(port) => {
-            let listener = TcpListener::bind("0.0.0.0:7878").unwrap();
+	println!("\n████████████████████████\n█▄─▀█▀─▄█▄─▄█▄─█─▄█─▄▄─█\n██─█▄█─███─███─▄▀██─██─█\n▀▄▄▄▀▄▄▄▀▄▄▄▀▄▄▀▄▄▀▄▄▄▄▀\n");
+	
+    let config = config::get();
+	log::config(&config);
+	// let pool = ThreadPool::new(4);
 
-            for stream in listener.incoming() {
-                let stream = stream.unwrap();
+	let listener = TcpListener::bind(format!("{}:{}", config.address, config.port)).unwrap();
+	println!("Started listening on:\n{}:{}\n", config.address, config.port);
+	for stream in listener.incoming() {
+		let stream = stream.unwrap();
 
-                miko::handle_connection(stream);
-            }
-        },
-        Err(_e) => panic!("Enviorment variable `Address` not set. Set enviorment variable `Address` to `0.0.0.0` or `127.0.0.1")
-    }
+		handle_connection(stream);
+	}
+}
+
+fn handle_connection(mut stream: TcpStream) {
+	let mut buf = [0; 2048];
+	while 0 != stream.read(&mut buf).unwrap() {
+		// let request = match std::str::from_utf8(&buf) {
+	 //        Ok(request) => {println!("{request}"); request},
+	 //        Err(e) => panic!("Request does not contain valid UTF-8"),
+	 //    };
+		println!("{buf:?}");
+	}
 }
